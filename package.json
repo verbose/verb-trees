@@ -22,16 +22,20 @@
     "test": "mocha"
   },
   "dependencies": {
-    "base-fs-tree": "^0.2.2",
+    "base-fs-tree": "^0.2.5",
+    "extend-shallow": "^2.0.1",
     "is-valid-app": "^0.2.0"
   },
   "devDependencies": {
     "delete": "^0.3.2",
     "generate": "^0.9.8",
+    "generate-collections": "^0.3.5",
+    "generate-defaults": "^0.4.2",
     "generate-project": "^0.2.0",
     "gulp-format-md": "^0.1.9",
     "mocha": "^2.5.3",
-    "npm-install-global": "^0.1.2"
+    "npm-install-global": "^0.1.2",
+    "verb-repo-data": "^0.1.11"
   },
   "keywords": [
     "docs",

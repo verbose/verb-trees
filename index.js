@@ -1,72 +1,100 @@
 'use strict';
 
+var extend = require('extend-shallow');
 var isValid = require('is-valid-app');
 var tree = require('base-fs-tree');
 var path = require('path');
+var config;
 
-module.exports = function(tasks, options) {
-module.exports = function(tasks, options) {
-  if (typeof tasks === 'string') {
-    tasks = [tasks];
+module.exports = function(fn, firstConfig) {
+  if (typeof fn !== 'function') {
+    throw new TypeError('expected a function');
   }
 
-  if (!Array.isArray(tasks)) {
-    options = tasks;
-    tasks = null;
+  config = firstConfig;
+  if (Array.isArray(config)) {
+    config = { tasks: config };
   }
 
-  options = options || {};
-  tasks = tasks || options.tasks || [];
+  config = config || {};
 
-  return function(app) {
-    if (!isValid(app, 'verb-trees')) return;
+  return function plugin(app) {
+    if (!isValid(this, 'verb-trees')) return;
     var origDest = app.options.dest || app.cwd;
-    var called;
 
-    /**
-     * Generate project trees
-     */
+    app.register('treeGenerator', function(sub) {
+      if (!isValid(this, 'verb-trees-subgenerator')) return;
 
-    app.task('trees-tasks', function(cb) {
-      var name = options.name || 'verb-trees';
-      origDest = app.options.dest || app.cwd;
-      var dest = app.options.trees || path.join(app.cwd, '.temp-trees');
-      if (!app.trees) {
-        app.create('trees', {viewType: 'partial'});
-      }
+      this.use(fn);
 
-      app.enable('silent');
-      app.use(tree({name: name}));
-      app.option('dest', dest);
-      app.option('layout', false);
-      app.preRender(/./, function(file, next) {
-        file.content = '{}';
-        next();
+      /**
+       * Generate project trees
+       */
+
+      this.task('trees-setup', function(cb) {
+        var opts = extend({dest: '.temp-trees'}, app.options, config);
+        var name = opts.name || 'verb-trees';
+        var dest = opts.dest || path.join(sub.cwd, '.temp-trees');
+        if (!sub.trees) {
+          sub.create('trees', {viewType: 'partial'});
+        }
+        sub.enable('silent');
+        sub.use(tree({name: name}));
+        sub.option('dest', dest);
+        sub.option('layout', false);
+        sub.preRender(/./, function(file, next) {
+          file.content = '{}';
+          next();
+        });
+        cb();
       });
 
-      var taskArray = createTasks(app, tasks);
-      if (taskArray.length === 0) {
+      this.task('trees-tasks', function(cb) {
+        var opts = extend({dest: '.temp-trees'}, app.options, config);
+        var taskArray = createTasks(sub, opts.tasks);
+        if (taskArray.length) {
+          sub.build(taskArray, cb);
+        } else {
+          cb();
+        }
+      });
+
+      this.task('trees-include', function(cb) {
+        if (!Object.keys(sub.trees.views).length) {
+          cb(new Error('no tree views were created, cannot generate trees'));
+          return;
+        }
+        if (typeof app.include !== 'function') {
+          app.create('includes', {viewType: 'partial'});
+        }
+        app.include('trees', {content: sub.compareTrees()});
         cb();
-        return;
-      }
+      });
 
-      app.build(taskArray, cb);
+      this.task('reset-dest', function(cb) {
+        sub.option('dest', origDest);
+        cb();
+      });
+
+      this.task('trees', [
+        'trees-setup',
+        'trees-tasks',
+        'reset-dest',
+        'trees-include'
+      ]);
     });
 
-    app.task('trees-emit', function(cb) {
-      app.emit('trees', app.compareTrees(), cb);
+    app.task('trees', function(cb) {
+      app.generate('treeGenerator:trees', cb);
     });
 
-    app.task('reset-dest', function(cb) {
-      app.option('dest', origDest);
-      cb();
-    });
-
-    app.task('trees', ['trees-tasks', 'trees-emit', 'reset-dest']);
+    app.task('default', ['trees']);
+    return plugin;
   };
-}
+};
 
 function createTasks(app, tasks) {
+  if (!tasks) return ['default'];
   tasks = Array.isArray(tasks) ? tasks : [tasks];
   var len = tasks.length;
   var idx = -1;
@@ -79,16 +107,19 @@ function createTasks(app, tasks) {
     app.task(task, [name], createTree(app));
   }
 
+  if (!res.length) return ['default'];
   return res;
 }
 
-function createTree(app) {
+function createTree(app, options) {
   return function(cb) {
+    var opts = extend({dest: '.temp-trees'}, app.options, options);
     var task = this;
-    var dest = app.options.treesDest;
     var name = task.name.replace(/^tree-/, '');
-    app.createTrees({name: name, dest: dest});
-    app.log.time('creating tree for', app.log.green(name));
+    app.createTrees({name: name, dest: opts.dest});
+    if (app.enabled('verbose')) {
+      app.log.time('creating tree for', app.log.green(name));
+    }
     cb();
-  }
+  };
 }
