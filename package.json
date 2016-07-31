@@ -1,0 +1,66 @@
+{
+  "name": "verb-trees",
+  "description": "Verb plugin for generating files trees for documentation.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/verbose/verb-trees",
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "repository": "verbose/verb-trees",
+  "bugs": {
+    "url": "https://github.com/verbose/verb-trees/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "LICENSE",
+    "templates"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "base-fs-tree": "^0.2.2",
+    "is-valid-app": "^0.2.0"
+  },
+  "devDependencies": {
+    "delete": "^0.3.2",
+    "generate": "^0.9.8",
+    "generate-project": "^0.2.0",
+    "gulp-format-md": "^0.1.9",
+    "mocha": "^2.5.3",
+    "npm-install-global": "^0.1.2"
+  },
+  "keywords": [
+    "docs",
+    "documentation",
+    "generate",
+    "plugin",
+    "tree",
+    "trees",
+    "verb",
+    "verbplugin"
+  ],
+  "verb": {
+    "toc": false,
+    "layout": "verb",
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
+    "lint": {
+      "reflinks": true
+    },
+    "related": {
+      "list": []
+    },
+    "reflinks": [
+      "verb",
+      "verb-generate-readme"
+    ]
+  }
+}
