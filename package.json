@@ -48,7 +48,7 @@
     "verbplugin"
   ],
   "verb": {
-    "toc": false,
+    "toc": true,
     "layout": "verb",
     "tasks": [
       "readme"
@@ -63,11 +63,13 @@
       "list": []
     },
     "reflinks": [
-      "verb",
-      "verb-generate-readme",
       "assemble",
       "generate",
-      "update"
+      "update",
+      "verb",
+      "verb-generate-readme",
+      "generate-engine",
+      "generate-project"
     ]
   }
 }
