@@ -22,9 +22,9 @@ module.exports = function(fn, firstConfig) {
     if (!isValid(this, 'verb-trees')) return;
     var origDest = app.options.dest || app.cwd;
 
-    app.register('treeGenerator', function(sub) {
+    app.register('archy', function(sub) {
       if (!isValid(this, 'verb-trees-subgenerator')) return;
-
+      this.enable('silent');
       this.use(fn);
 
       /**
@@ -38,7 +38,6 @@ module.exports = function(fn, firstConfig) {
         if (!sub.trees) {
           sub.create('trees', {viewType: 'partial'});
         }
-        sub.enable('silent');
         sub.use(tree({name: name}));
         sub.option('dest', dest);
         sub.option('layout', false);
@@ -67,7 +66,8 @@ module.exports = function(fn, firstConfig) {
         if (typeof app.include !== 'function') {
           app.create('includes', {viewType: 'partial'});
         }
-        app.include('trees', {content: sub.compareTrees()});
+        app.include('trees-dest', {content: sub.compareTrees()});
+        app.include('trees-src', {content: sub.createSrcTrees()});
         cb();
       });
 
@@ -85,7 +85,7 @@ module.exports = function(fn, firstConfig) {
     });
 
     app.task('trees', function(cb) {
-      app.generate('treeGenerator:trees', cb);
+      app.generate('archy:trees', cb);
     });
 
     app.task('default', ['trees']);
@@ -117,7 +117,7 @@ function createTree(app, options) {
     var task = this;
     var name = task.name.replace(/^tree-/, '');
     app.createTrees({name: name, dest: opts.dest});
-    if (app.enabled('verbose')) {
+    if (app.enabled('verbose') || app.enabled('verbose.trees')) {
       app.log.time('creating tree for', app.log.green(name));
     }
     cb();

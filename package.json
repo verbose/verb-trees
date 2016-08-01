@@ -22,7 +22,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "base-fs-tree": "^0.2.5",
+    "base-fs-tree": "^0.2.6",
     "extend-shallow": "^2.0.1",
     "is-valid-app": "^0.2.0"
   },
@@ -64,7 +64,10 @@
     },
     "reflinks": [
       "verb",
-      "verb-generate-readme"
+      "verb-generate-readme",
+      "assemble",
+      "generate",
+      "update"
     ]
   }
 }

@@ -66,12 +66,12 @@ describe('verb-trees', function() {
 
     it('should run the trees-setup task', function(cb) {
       app.register('project', plugin(project));
-      app.generate('project.treeGenerator:trees-setup', cb);
+      app.generate('project.archy:trees-setup', cb);
     });
 
     it('should run the reset-dest task', function(cb) {
       app.register('project', plugin(project));
-      app.generate('project.treeGenerator:reset-dest', cb);
+      app.generate('project.archy:reset-dest', cb);
     });
   });
 });
